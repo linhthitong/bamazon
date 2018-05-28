@@ -1,3 +1,7 @@
+require("dotenv").config();
+
+var password = require("./password.js");
+
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
@@ -9,7 +13,7 @@ var connection = mysql.createConnection({
 
     user: "root",
 
-    password: "",
+    password: "password",
     database: "bamazon_DB"
 
 });
@@ -18,28 +22,28 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if(err) throw err;
 //run the start function after the connection is made to prompt  the user
-    start();
+    // start();
 
 });
 
 // function which prompts the user for what action they should take
-function start() {
-    inquirer
-        .prompt({
-            name: "purchaseOrQuit",
-            type: "rawlist",
-            message: "What is the item ID you would like to [PURCHASE] or [EXIT]?",
-            choices:["PURCHASE","EXIT"]
+// function start() {
+//     inquirer
+//         .prompt({
+//             name: "purchaseOrQuit",
+//             type: "rawlist",
+//             message: "What is the item ID you would like to [PURCHASE] or [EXIT]?",
+//             choices:["PURCHASE","EXIT"]
 
-        })
-        .then(function(answer) {
-        //based on user's answer, either call the purchase or exit functions
-        if (answer.purchaseOrQuit.toUpperCase() === "PURCHASE") {
-            postPurchase();
-        }
-        else {
-            exitSystem();
-        }
-        });
+//         })
+//         .then(function(answer) {
+//         //based on user's answer, either call the purchase or exit functions
+//         if (answer.purchaseOrQuit.toUpperCase() === "PURCHASE") {
+//             postPurchase();
+//         }
+//         else {
+//             exitSystem();
+//         }
+//         });
 
-    }
+//     }
