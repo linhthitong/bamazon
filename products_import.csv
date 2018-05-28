@@ -1,0 +1,11 @@
+item_id,product_name,department_name,price,stock_quantity
+1,Tom's Toothpaste,Personal Care,3.79,300
+2,Thinkbaby Sunscreen,Personal Care,12.99,150
+3,Weber Charcoal Grill,Outdoor Cooking, 349.00 ,50
+4,Kingsford Charcoal,Outdoor Cooking,19.87,100
+5,Sushi Deluxe Platter,Food and Drink, 200.00 ,10
+6,Sapporo Beer 22oz.,Food and Drink, 3.00 ,80
+7,Beach Flipflops,Apparel, 20.00 ,200
+8,Beach Towels,Apparel, 15.00 ,120
+9,Laundry Detergent,Household Supplies, 18.97 ,450
+10,Pinesol Cleaner,Household Supplies, 10.26 ,400
