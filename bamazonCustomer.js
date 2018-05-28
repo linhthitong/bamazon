@@ -28,8 +28,18 @@ function start() {
         .prompt({
             name: "purchaseOrQuit",
             type: "rawlist",
-            message: "What is the item ID you would like to purchase?"
+            message: "What is the item ID you would like to [PURCHASE] or [EXIT]?",
+            choices:["PURCHASE","EXIT"]
 
         })
+        .then(function(answer) {
+        //based on user's answer, either call the purchase or exit functions
+        if (answer.purchaseOrQuit.toUpperCase() === "PURCHASE") {
+            postPurchase();
+        }
+        else {
+            exitSystem();
+        }
+        });
 
-}
+    }
