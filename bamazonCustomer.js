@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
 
     user: "root",
 
-    password: "",
+    password: process.env.PASSWORD_,
     database: "bamazon_DB"
 
 });
@@ -30,7 +30,7 @@ connection.connect(function(err) {
 // run the start function after the connection is made to prompt  the user
 
 displayProducts();    
-start();
+// start();
 
 });
 
@@ -41,7 +41,7 @@ function displayProducts() {
 
     // create table to display items for purchase to the user
         var table = new Table({
-            head: ["Item Id", "Product_Name", "Price"],
+            head: ["Item Id", "Product_Name", "Price","quantity"],
             // colWidths: [10, 200, 10],
             style: {
                 head: ["blue"],
@@ -55,14 +55,15 @@ function displayProducts() {
             
                 for (var i = 0; i < res.length; i++){
                 table.push(
-                [res[i].id, res[i].product_name, res[i].price]
+                [res[i].id, res[i].product_name, res[i].price, res[i].stock_quantity]
 
             );
-            
-            console.log(table.toString());
+
            
             }
-              
+            
+            console.log("\n", table.toString());
+            start();              
             }
     }); 
 }
@@ -73,26 +74,22 @@ function start() {
     inquirer
         .prompt({
             name: "purchaseOrQuit",
-            type: "input",
+            type: "list",
+            choices: ["buy","exit"],
             message: "Enter the ID of the item you would like to purchase? [Quit with Q]",
             validate: function(value) { 
-
-                var findProductQuery = "SELECT id from products WHERE id = 8"
-                connection.query(findProductQuery);
-                console.log(res.id);
-                if (isNaN(value) == false && productExists != null) {
-                    console.log("valid product");
-                    return true;
-                } else {
-                    console.log("invalid product");
-                    return false;
-                }
+                // console.log(res)
+                // if (isNaN(value) == false && parseInt(value) <= res.length && parseInt(value) > 0) {
+                //     return true;
+                // } else {
+                //     return false;
+                // }
             }
         
         })
         .then(function(answer) {
         //based on user's answer, either call the purchase or exit functions
-        if (answer.purchaseOrQuit.toUpperCase() != "Q") {
+        if (answer.purchaseOrQuit == "buy") {
             postPurchase();
         }
         else {
@@ -105,6 +102,17 @@ function start() {
 function postPurchase() {
     inquirer
         .prompt([
+            {
+            name: "itemNumber",
+            type: "input",
+            message: "What item would you like to purchase?", 
+            validate: function(value) {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return false;
+            }
+            },
           {
             name: "itemCount",
             type: "input",
@@ -120,21 +128,25 @@ function postPurchase() {
        ])
         .then(function(answer) {
 
+            var itemNumber = parseInt(answer.itemNumber);
             var numberofItems = parseInt(answer.itemCount);
-        
-            var userSelection = "SELECT * FROM products WHERE ID = ? AND stock_quantity >= ?"; 
-             connection.query(userSelection,[answer.id, answer.stock_quantity]); 
+        console.log(itemNumber);
+            var userSelection = "SELECT * FROM products WHERE ?";   // AND stock_quantity >= ?
+             connection.query(userSelection,[{id :itemNumber}], function(err,data){
+                if (err) throw err;
+                console.log(data[0]);
+                if(parseInt(data[0].stock_quantity <numberofItems )) console.log("not enough anoumt of "+ data[0].product_name);
              console.log("user selected!");
-             console.log(res.userSelection);
+            //  console.log(res.userSelection);
 
             
             // check for quantity on hand is available
-            if(res[answer.id].stock_quantity >= numberofItems) {
+            if(parseInt(data[0].stock_quantity) >= numberofItems) {
                 
             // Update stock quantity in database to reflect purchase    
                 connection.query("UPDATE products SET ? WHERE ?", [
-                {stock_quantity: (res[userSelection].stock_quantity - numberofItems)},
-                {id: answer.id}],
+                {stock_quantity: (data[0].stock_quantity - numberofItems)},
+                {id: answer.itemNumber}],
                 function(err, result) {
                     if(err) throw err;
                     console.log("Your purchase has been confirmed!")
@@ -142,6 +154,8 @@ function postPurchase() {
 
             }
        });
+    }); 
+
         // //based on user's input, either call the purchase  or quit functions
         // if (answer.itemCountOrQuit.toUpperCase() != "Q") {
         //   connection.query("SELECT * FROM products", function(err, results) {
