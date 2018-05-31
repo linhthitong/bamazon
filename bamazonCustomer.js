@@ -27,10 +27,10 @@ connection.connect(function(err) {
     // connection.end();
    
 
-// run the start function after the connection is made to prompt  the user
+// run the start function after the connection is made to prompt the user
 
 displayProducts();    
-// start();
+
 
 });
 
@@ -41,27 +41,22 @@ function displayProducts() {
 
     // create table to display items for purchase to the user
         var table = new Table({
-            head: ["Item Id", "Product_Name", "Price","quantity"],
+            head: ["Item Id", "Product Name", "Price","Quantity"],
             // colWidths: [10, 200, 10],
             style: {
                 head: ["blue"],
                 compact: false,
                 colAligns: ["center"],
-                
-                }
-                
+            }
+         
         });console.log("table is working!")
             { 
-            
-                for (var i = 0; i < res.length; i++){
+            for (var i = 0; i < res.length; i++){
                 table.push(
                 [res[i].id, res[i].product_name, res[i].price, res[i].stock_quantity]
-
-            );
-
-           
+                );
+   
             }
-            
             console.log("\n", table.toString());
             start();              
             }
@@ -75,8 +70,9 @@ function start() {
         .prompt({
             name: "purchaseOrQuit",
             type: "list",
-            choices: ["buy","exit"],
-            message: "Enter the ID of the item you would like to purchase? [Quit with Q]",
+            choices: ["purchase","exit"],
+            message: "Would you like to make a purchase or exit the system?",
+            // [Quit with Q]
             validate: function(value) { 
                 // console.log(res)
                 // if (isNaN(value) == false && parseInt(value) <= res.length && parseInt(value) > 0) {
@@ -89,11 +85,16 @@ function start() {
         })
         .then(function(answer) {
         //based on user's answer, either call the purchase or exit functions
-        if (answer.purchaseOrQuit == "buy") {
+        if (answer.purchaseOrQuit == "purchase") {
             postPurchase();
         }
         else {
-            exitSystem();
+            (answer.purchaseOrQuit == "exit");
+            console.log("Good-bye. Have a nice day!");
+            connection.end();
+        // }
+        // else {
+            // exitSystem();
         }
     });
 
@@ -105,7 +106,7 @@ function postPurchase() {
             {
             name: "itemNumber",
             type: "input",
-            message: "What item would you like to purchase?", 
+            message: "Enter the ID of the item you want to purchase.", 
             validate: function(value) {
                 if (isNaN(value) === false) {
                     return true;
@@ -130,13 +131,17 @@ function postPurchase() {
 
             var itemNumber = parseInt(answer.itemNumber);
             var numberofItems = parseInt(answer.itemCount);
+            var totalCost = parseFloat(((answer.itemNumber.price)*numberofItems));
+
         console.log(itemNumber);
             var userSelection = "SELECT * FROM products WHERE ?";   // AND stock_quantity >= ?
              connection.query(userSelection,[{id :itemNumber}], function(err,data){
                 if (err) throw err;
                 console.log(data[0]);
-                if(parseInt(data[0].stock_quantity <numberofItems )) console.log("not enough anoumt of "+ data[0].product_name);
-             console.log("user selected!");
+                if(parseInt(data[0].stock_quantity <numberofItems )) 
+                console.log("Sorry, we do not have enough " + data[0].product_name);
+                connection.end();
+            //  console.log("user selected!");
             //  console.log(res.userSelection);
 
             
@@ -149,21 +154,12 @@ function postPurchase() {
                 {id: answer.itemNumber}],
                 function(err, result) {
                     if(err) throw err;
-                    console.log("Your purchase has been confirmed!")
+                    console.log("Your purchase has been confirmed! Total cost is $ " + (answer.itemNumber*numberofItems.toFixed(2)));
+                    connection.end();
                 });
 
             }
        });
     }); 
-
-        // //based on user's input, either call the purchase  or quit functions
-        // if (answer.itemCountOrQuit.toUpperCase() != "Q") {
-        //   connection.query("SELECT * FROM products", function(err, results) {
-            // if (err) throw err;
-            // console.log("Your purchase was created successfully!");
-
-        // }
-
-        // start();
 
 }
