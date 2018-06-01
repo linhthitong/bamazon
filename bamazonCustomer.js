@@ -4,7 +4,7 @@ var password = require("./password.js");
 
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var Table = require('cli-table');
+var Table = require('cli-table2');
 var colors = require("colors/safe");
 
 //create the connection information for the sql database
@@ -23,11 +23,9 @@ var connection = mysql.createConnection({
 //connect to the mysql server and sql database
 connection.connect(function(err) {
     if(err) throw err;
-    // console.log("connected as id " + connection.threadId);
-    // connection.end();
-   
+     
 
-// run the start function after the connection is made to prompt the user
+// run the displayProducts function after the connection is made to prompt the user
 
 displayProducts();    
 
@@ -41,15 +39,16 @@ function displayProducts() {
 
     // create table to display items for purchase to the user
         var table = new Table({
-            head: ["Item Id", "Product Name", "Price","Quantity"],
-            // colWidths: [10, 200, 10],
+            head: [" Item Id ", "   Product Name   ", " Price "," Quantity "],
+            
             style: {
                 head: ["blue"],
                 compact: false,
                 colAligns: ["center"],
             }
          
-        });console.log("table is working!")
+        }); 
+        // create rows for each item, product, price and qty to populate table
             { 
             for (var i = 0; i < res.length; i++){
                 table.push(
@@ -63,7 +62,7 @@ function displayProducts() {
     }); 
 }
 
-// function which prompts the user for what action they should take
+// function which prompts the user for what action user should take
 function start() {
 
     inquirer
@@ -72,19 +71,14 @@ function start() {
             type: "list",
             choices: ["purchase","exit"],
             message: "Would you like to make a purchase or exit the system?",
-            // [Quit with Q]
+            
             validate: function(value) { 
-                // console.log(res)
-                // if (isNaN(value) == false && parseInt(value) <= res.length && parseInt(value) > 0) {
-                //     return true;
-                // } else {
-                //     return false;
-                // }
+             
             }
         
         })
         .then(function(answer) {
-        //based on user's answer, either call the purchase or exit functions
+        //based on user's answer, run purchase or exit function
         if (answer.purchaseOrQuit == "purchase") {
             postPurchase();
         }
@@ -92,14 +86,12 @@ function start() {
             (answer.purchaseOrQuit == "exit");
             console.log("Good-bye. Have a nice day!");
             connection.end();
-        // }
-        // else {
-            // exitSystem();
+        
         }
     });
 
 }
-
+// Prompt user to enter item and quantity to be purchased
 function postPurchase() {
     inquirer
         .prompt([
@@ -131,39 +123,35 @@ function postPurchase() {
 
             var itemNumber = parseInt(answer.itemNumber);
             var numberofItems = parseInt(answer.itemCount);
-            var totalCost = parseFloat(((answer.itemNumber.price)*numberofItems));
+            // var totalCost = parseFloat(((answer.itemNumber.price)*numberofItems));
             
 
         console.log(itemNumber);
         
-            var userSelection = "SELECT * FROM products WHERE ?";   // AND stock_quantity >= ?
-             connection.query(userSelection,[{id :itemNumber}], function(err,data){
-                
+        var userSelection = "SELECT * FROM products WHERE ?";   
+            connection.query(userSelection,[{id :itemNumber}], function(err,data){
+        // check to make sure there is sufficient quantity on-hand        
                 if (err) throw err;
                 console.log(data[0]);
-                console.log("==============================================================================");
                 if(parseInt(data[0].stock_quantity) <numberofItems) {
-                console.log("=========================================================================");
                 console.log("Sorry, we do not have enough " + data[0].product_name);
                 connection.end();
                 }
-            //  console.log("user selected!");
-            //  console.log(res.userSelection);
-
-            
-            // check for quantity on hand is available
+                        
+        // If there is sufficient quantity available, fullfill the purchase and reduce quantity from inventory
             if(parseInt(data[0].stock_quantity) >= numberofItems) {
                 
-            // Update stock quantity in database to reflect purchase    
-                connection.query("UPDATE products SET ? WHERE ?", [
-                {stock_quantity: (data[0].stock_quantity - numberofItems)},
-                {id: answer.itemNumber}],
-                function(err, result) {
-                    if(err) throw err;
-                    console.log("Your purchase has been confirmed! Total cost is $ " + ( numberofItems*data[0].price).toFixed(2));
-                    // console.log(answer.itemNumber);
+            connection.query("UPDATE products SET ? WHERE ?", [
+            {stock_quantity: (data[0].stock_quantity - numberofItems)},
+            {id: answer.itemNumber}],
+         
+        // Provide total cost of purchase 
+            function(err, result) {
+                if(err) throw err;
+                console.log("Your purchase has been confirmed! Total cost is $ " + ( numberofItems*data[0].price).toFixed(2));
+                // console.log(answer.itemNumber);
 
-                    connection.end();
+                connection.end();
                 });
 
             }
