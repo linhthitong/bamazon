@@ -132,15 +132,21 @@ function postPurchase() {
             var itemNumber = parseInt(answer.itemNumber);
             var numberofItems = parseInt(answer.itemCount);
             var totalCost = parseFloat(((answer.itemNumber.price)*numberofItems));
+            
 
         console.log(itemNumber);
+        
             var userSelection = "SELECT * FROM products WHERE ?";   // AND stock_quantity >= ?
              connection.query(userSelection,[{id :itemNumber}], function(err,data){
+                
                 if (err) throw err;
                 console.log(data[0]);
-                if(parseInt(data[0].stock_quantity <numberofItems )) 
+                console.log("==============================================================================");
+                if(parseInt(data[0].stock_quantity) <numberofItems) {
+                console.log("=========================================================================");
                 console.log("Sorry, we do not have enough " + data[0].product_name);
                 connection.end();
+                }
             //  console.log("user selected!");
             //  console.log(res.userSelection);
 
@@ -154,7 +160,9 @@ function postPurchase() {
                 {id: answer.itemNumber}],
                 function(err, result) {
                     if(err) throw err;
-                    console.log("Your purchase has been confirmed! Total cost is $ " + (answer.itemNumber*numberofItems.toFixed(2)));
+                    console.log("Your purchase has been confirmed! Total cost is $ " + ( numberofItems*data[0].price).toFixed(2));
+                    // console.log(answer.itemNumber);
+
                     connection.end();
                 });
 
