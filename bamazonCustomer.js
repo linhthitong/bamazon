@@ -4,7 +4,7 @@ var password = require("./password.js");
 
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var Table = require('cli-table2');
+var Table = require("cli-table2");
 var colors = require("colors/safe");
 
 //create the connection information for the sql database
@@ -123,16 +123,15 @@ function postPurchase() {
 
             var itemNumber = parseInt(answer.itemNumber);
             var numberofItems = parseInt(answer.itemCount);
-            // var totalCost = parseFloat(((answer.itemNumber.price)*numberofItems));
-            
+                 
 
-        console.log(itemNumber);
+        // console.log(itemNumber);
         
         var userSelection = "SELECT * FROM products WHERE ?";   
             connection.query(userSelection,[{id :itemNumber}], function(err,data){
         // check to make sure there is sufficient quantity on-hand        
                 if (err) throw err;
-                console.log(data[0]);
+                //console.log(data[0]);
                 if(parseInt(data[0].stock_quantity) <numberofItems) {
                 console.log("Sorry, we do not have enough " + data[0].product_name);
                 connection.end();
